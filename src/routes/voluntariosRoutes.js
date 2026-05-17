@@ -24,3 +24,5 @@ router.post('/voluntarios', async (req, res) => {
         }
     }
 })
+
+module.exports = router;
