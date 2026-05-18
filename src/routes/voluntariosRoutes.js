@@ -25,4 +25,33 @@ router.post('/voluntarios', async (req, res) => {
     }
 })
 
+router.get('/voluntarios', async (req, res) => {
+    try{
+    const query = `SELECT id, nome, sobrenome, email, telefone, nascimento, biografia FROM voluntarios`;
+    const resultado = await pool.query(query);
+    res.json(resultado.rows);
+    } catch (error) {
+        console.error('Erro ao buscar voluntário:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+})
+
+router.get('/voluntarios/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const query = 'SELECT id, nome, sobrenome, email, telefone, nascimento, biografia FROM voluntarios WHERE id = $1';
+        const values = [id];
+        const resultado = await pool.query(query, values);
+
+        if (resultado.rows.length === 0) {
+            return res.status(404).json({ error: 'Voluntário não encontrado' });
+        }
+        res.json(resultado.rows[0]);
+    } catch (error) {
+        console.error('Erro ao buscar voluntário:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
 module.exports = router;
