@@ -54,4 +54,40 @@ router.get('/voluntarios/:id', async (req, res) => {
     }
 });
 
+router.put('/voluntarios/:id', async (req, res) => {
+    const { id } = req.params;
+    const { nome, sobrenome, email, senha, telefone, nascimento, biografia } = req.body;
+    try{
+        let query;
+        let values;
+        if (senha ) {
+            // Cenário A: Com Senha. Criptografamos e incluindo a senha na query.
+            const hashSenha = await bcrypt.hash(senha, 10);
+            query = `UPDATE voluntarios 
+            SET nome = $1, sobrenome = $2, email = $3, senha = $4, telefone = $5, nascimento = $6, biografia = $7 
+            WHERE id = $8 
+            RETURNING id, nome, sobrenome, email`;
+            values = [nome, sobrenome, email, hashSenha, telefone, nascimento, biografia, id];
+        } else {
+            // Cenário B: Sem Senha. A query ignora o campo senha completamente.
+            query = `UPDATE voluntarios 
+            SET nome = $1, sobrenome = $2, email = $3, telefone = $4, nascimento = $5, biografia = $6 
+            WHERE id = $7 
+            RETURNING id, nome, sobrenome, email`;
+            values = [nome, sobrenome, email, telefone, nascimento, biografia, id];
+        }
+        const resultado = await pool.query(query, values);
+        // Se o número de linhas afetadas for igual a 0...
+        if (resultado.rowCount === 0) {
+            // Significa que o ID não existia! Paramos a rota e devolvemos 404.
+            return res.status(404).json({ error: 'Voluntário não encontrado' });
+        }  
+        res.json(resultado.rows[0]);      
+    } catch (error) {
+        console.error('Erro ao atualizar voluntário:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+        
+    }
+});
+
 module.exports = router;
