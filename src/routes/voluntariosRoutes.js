@@ -90,4 +90,21 @@ router.put('/voluntarios/:id', async (req, res) => {
     }
 });
 
+router.delete('/voluntarios/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const query = 'DELETE FROM voluntarios WHERE id = $1 RETURNING id';
+        const values = [id];
+        const resultado = await pool.query(query, values);
+        if (resultado.rowCount === 0) {
+            return res.status(404).json({ error: 'Voluntário não encontrado' });
+        }
+        res.json({ message: 'Voluntário excluído com sucesso' });
+    } catch (error) {
+        console.error('Erro ao excluir voluntário:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
 module.exports = router;
