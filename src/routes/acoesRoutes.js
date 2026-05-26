@@ -19,11 +19,10 @@ router.post('/acoes', async (req, res) => {
 
 // 2. GET /acoes — Lista todas as ações cadastradas
 router.get('/acoes', async (req, res) => {
-    // Buscamos todas as colunas da tabela acoes
     const query = `SELECT id, titulo, descricao, url_imagem, tipo, id_autor, data_criacao FROM acoes`;
     const resultado = await pool.query(query);
     
-    res.json(resultado.rows); // Retorna o array de ações (mesmo que vazio)
+    res.json(resultado.rows);
 });
 
 // 3. GET /acoes/:id — Busca uma ação específica pelo ID
@@ -33,12 +32,47 @@ router.get('/acoes/:id', async (req, res) => {
     const query = `SELECT id, titulo, descricao, url_imagem, tipo, id_autor, data_criacao FROM acoes WHERE id = $1`;
     const resultado = await pool.query(query, [id]);
 
-    // Regra de negócio: Se não encontrar nenhuma linha correspondente ao ID
     if (resultado.rows.length === 0) {
         return res.status(404).json({ error: 'Ação não encontrada.' });
     }
 
     res.json(resultado.rows[0]);
+});
+
+// 4. PUT /acoes/:id — Atualiza os dados de uma ação existente
+router.put('/acoes/:id', async (req, res) => {
+    const { id } = req.params;
+    const { titulo, descricao, url_imagem, tipo, id_autor } = req.body;
+
+    const query = `
+        UPDATE acoes 
+        SET titulo = $1, descricao = $2, url_imagem = $3, tipo = $4, id_autor = $5
+        WHERE id = $6
+        RETURNING id, titulo, descricao, url_imagem, tipo, id_autor, data_criacao
+    `;
+    const values = [titulo, descricao, url_imagem, tipo, id_autor, id];
+
+    const resultado = await pool.query(query, values);
+
+    if (resultado.rowCount === 0) {
+        return res.status(404).json({ error: 'Ação não encontrada.' });
+    }
+
+    res.json(resultado.rows[0]);
+});
+
+// 5. DELETE /acoes/:id — Remove uma ação do sistema
+router.delete('/acoes/:id', async (req, res) => {
+    const { id } = req.params;
+
+    const query = 'DELETE FROM acoes WHERE id = $1 RETURNING id';
+    const resultado = await pool.query(query, [id]);
+
+    if (resultado.rowCount === 0) {
+        return res.status(404).json({ error: 'Ação não encontrada.' });
+    }
+
+    res.json({ message: 'Ação excluída com sucesso.' });
 });
 
 module.exports = router;
