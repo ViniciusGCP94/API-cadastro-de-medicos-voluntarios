@@ -16,8 +16,7 @@ router.post('/voluntarios', async (req, res) => {
 
     const result = await pool.query(query, values);
     res.status(201).json(result.rows[0]);
-    // Se o e-mail for duplicado, o banco joga o erro 23505, o Express 5 captura 
-    // e o seu middleware envia o 409 automaticamente!
+    // Se o e-mail for duplicado, o banco joga o erro 23505, o Express 5 captura e o seu middleware envia o 409 automaticamente!
 });
 
 // 2. LISTAR TODOS
