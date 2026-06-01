@@ -32,3 +32,28 @@ ALTER TABLE "inscricoes" ADD FOREIGN KEY ("id_voluntario") REFERENCES "voluntari
 ALTER TABLE "acoes" ADD FOREIGN KEY ("id_autor") REFERENCES "voluntarios" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE "inscricoes" ADD FOREIGN KEY ("id_acao") REFERENCES "acoes" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
+-- =======================================================
+-- 🔒 RESTRIÇÕES DE SEGURANÇA (CONSTRAINTS)
+-- =======================================================
+
+-- Garante que um voluntário não possa se inscrever duas vezes na mesma ação
+ALTER TABLE inscricoes ADD CONSTRAINT unique_voluntario_acao UNIQUE (id_voluntario, id_acao);
+
+-- =======================================================
+-- 🧪 POPULAÇÃO INICIAL DE TESTES (SEEDS)
+-- =======================================================
+-- ATENÇÃO: Os comandos abaixo limpam as tabelas e inserem dados fictícios para testes locais.
+
+-- Limpa dados antigos respeitando a ordem das chaves estrangeiras
+DELETE FROM inscricoes;
+DELETE FROM acoes;
+DELETE FROM voluntarios;
+
+-- Insere Voluntário de Teste (ID 1)
+INSERT INTO voluntarios (nome, sobrenome, email, senha, telefone, nascimento, biografia)
+VALUES ('Vinicius', 'Dev', 'vinicius@teste.com', '123456', '11999999999', '1995-01-01', 'Desenvolvedor Fullstack');
+
+-- Insere Ação de Teste (ID 1 - Vinculada ao autor ID 1)
+INSERT INTO acoes (titulo, descricao, url_imagem, tipo, id_autor)
+VALUES ('Ação Teste', 'Descrição da ação de teste', 'http://imagem.com', 'Social', 1);
