@@ -15,7 +15,7 @@ CREATE TABLE "acoes" (
   "titulo" varchar(120) NOT NULL,
   "descricao" varchar(300) NOT NULL,
   "url_imagem" varchar(255) NOT NULL,
-  "type" varchar(255) NOT NULL,
+  "tipo" varchar(255) NOT NULL,
   "id_autor" integer,
   "data_criacao" timestamp DEFAULT (current_timestamp)
 );
