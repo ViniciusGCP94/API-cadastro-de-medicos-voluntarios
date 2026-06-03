@@ -17,9 +17,7 @@ router.post('/inscricoes', async (req, res, next) => {
         const resultado = await pool.query(query, values);
         res.status(201).json(resultado.rows[0]);
     } catch (error) {
-        // Se o voluntário/ação não existir (23503) ou se for duplicado (23505),
-        // o erro é enviado diretamente para o middleware global do app.js
-        next(error);
+        next(error); // Trata automaticamente duplicados (23505) ou chaves inválidas (23503)
     }
 });
 
@@ -28,7 +26,6 @@ router.get('/voluntarios/:id/inscricoes', async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        // Trazemos os dados da inscrição junto com os detalhes da ação usando INNER JOIN
         const query = `
             SELECT 
                 i.id AS id_inscricao,
@@ -44,7 +41,7 @@ router.get('/voluntarios/:id/inscricoes', async (req, res, next) => {
 
         const resultado = await pool.query(query, [id]);
         
-        // Retorna a lista (mesmo que vazia, caso o voluntário não tenha inscrições)
+        // Retorna a lista (vazia ou populada). Não lançamos 404 aqui porque ter 0 inscrições é um estado operacional válido.
         res.json(resultado.rows);
     } catch (error) {
         next(error);
@@ -59,9 +56,10 @@ router.delete('/inscricoes/:id', async (req, res, next) => {
         const query = 'DELETE FROM inscricoes WHERE id = $1 RETURNING id';
         const resultado = await pool.query(query, [id]);
 
-        // Validação manual necessária: deletar um ID inexistente não gera erro no banco
         if (resultado.rowCount === 0) {
-            return res.status(404).json({ error: 'Inscrição não encontrada.' });
+            const erro = new Error('Inscrição não encontrada para cancelamento.');
+            erro.status = 404;
+            throw erro;
         }
 
         res.json({ message: 'Inscrição cancelada com sucesso.' });

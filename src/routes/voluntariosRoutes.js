@@ -16,7 +16,7 @@ router.post('/voluntarios', async (req, res, next) => {
         const result = await pool.query(query, values);
         res.status(201).json(result.rows[0]);
     } catch (err) {
-        next(err);
+        next(err); // Centralizado no app.js (ex: erro 23505)
     }
 });
 
@@ -38,8 +38,11 @@ router.get('/voluntarios/:id', async (req, res, next) => {
         const query = 'SELECT id, nome, sobrenome, email, telefone, nascimento, biografia FROM voluntarios WHERE id = $1';
         const resultado = await pool.query(query, [id]);
 
+        // Em vez de res.status(404).json, delegamos para o middleware global
         if (resultado.rows.length === 0) {
-            return res.status(404).json({ error: 'Voluntário não encontrado' });
+            const erro = new Error('Voluntário não encontrado.');
+            erro.status = 404;
+            throw erro;
         }
         res.json(resultado.rows[0]);
     } catch (err) {
@@ -74,7 +77,9 @@ router.put('/voluntarios/:id', async (req, res, next) => {
         const resultado = await pool.query(query, values);
 
         if (resultado.rowCount === 0) {
-            return res.status(404).json({ error: 'Voluntário não encontrado' });
+            const erro = new Error('Voluntário não encontrado para atualização.');
+            erro.status = 404;
+            throw erro;
         }  
         res.json(resultado.rows[0]);      
     } catch (err) {
@@ -90,7 +95,9 @@ router.delete('/voluntarios/:id', async (req, res, next) => {
         const resultado = await pool.query(query, [id]);
 
         if (resultado.rowCount === 0) {
-            return res.status(404).json({ error: 'Voluntário não encontrado' });
+            const erro = new Error('Voluntário não encontrado para exclusão.');
+            erro.status = 404;
+            throw erro;
         }
         res.json({ message: 'Voluntário excluído com sucesso' });
     } catch (err) {

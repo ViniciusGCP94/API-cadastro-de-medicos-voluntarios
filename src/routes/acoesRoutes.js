@@ -17,7 +17,7 @@ router.post('/acoes', async (req, res, next) => {
         const resultado = await pool.query(query, values);
         res.status(201).json(resultado.rows[0]);
     } catch (err) {
-        next(err);
+        next(err); // O middleware global trata erros de FK (id_autor inexistente - 23503)
     }
 });
 
@@ -40,7 +40,9 @@ router.get('/acoes/:id', async (req, res, next) => {
         const resultado = await pool.query(query, [id]);
 
         if (resultado.rows.length === 0) {
-            return res.status(404).json({ error: 'Ação não encontrada.' });
+            const erro = new Error('Ação não encontrada.');
+            erro.status = 404;
+            throw erro; // Capturado pelo catch e enviado ao middleware global
         }
 
         res.json(resultado.rows[0]);
@@ -66,7 +68,9 @@ router.put('/acoes/:id', async (req, res, next) => {
         const resultado = await pool.query(query, values);
 
         if (resultado.rowCount === 0) {
-            return res.status(404).json({ error: 'Ação não encontrada.' });
+            const erro = new Error('Ação não encontrada para atualização.');
+            erro.status = 404;
+            throw erro;
         }
 
         res.json(resultado.rows[0]);
@@ -83,7 +87,9 @@ router.delete('/acoes/:id', async (req, res, next) => {
         const resultado = await pool.query(query, [id]);
 
         if (resultado.rowCount === 0) {
-            return res.status(404).json({ error: 'Ação não encontrada.' });
+            const erro = new Error('Ação não encontrada para exclusão.');
+            erro.status = 404;
+            throw erro;
         }
 
         res.json({ message: 'Ação excluída com sucesso.' });
