@@ -39,7 +39,8 @@ app.use((err, req, res, next) => {
 
     //Captura erros operacionais que você mesmo pode lançar nas rotas com um status customizado
     if (err.status) {
-        return res.status(err.status).json({ error: err.message });
+        return res.status(err.status).json({ 
+            error: Array.isArray(err.message) ? err.message : err.message });
     }
 
     // Fallback para qualquer outro erro não mapeado
