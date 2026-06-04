@@ -2,9 +2,25 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
 
+const { body, validationResult } = require('express-validator');
+
 // 1. POST /acoes — Cria uma nova ação vinculada a um voluntário (autor)
-router.post('/acoes', async (req, res, next) => {
+router.post('/acoes',
+[
+    body('titulo').trim().notEmpty().withMessage('O título é obrigatório.'),
+    body('tipo').trim().notEmpty().withMessage('O tipo é obrigatório.'),
+    body('id_autor').isInt().withMessage('O ID do autor deve ser um número inteiro.'),
+],
+async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const erroValidacao = new Error('Falha na validação dos dados.');
+            erroValidacao.status = 400;
+            erroValidacao.message = errors.array().map(err => err.msg);
+            throw erroValidacao;
+        }
+
         const { titulo, descricao, url_imagem, tipo, id_autor } = req.body;
 
         const query = `
@@ -52,8 +68,21 @@ router.get('/acoes/:id', async (req, res, next) => {
 });
 
 // 4. PUT /acoes/:id — Atualiza os dados de uma ação existente
-router.put('/acoes/:id', async (req, res, next) => {
+router.put('/acoes/:id',
+[
+    body('titulo').trim().notEmpty().withMessage('O título é obrigatório.'),
+    body('tipo').trim().notEmpty().withMessage('O tipo é obrigatório.'),
+    body('id_autor').isInt({ min: 1 }).withMessage('O ID do autor deve ser um número inteiro positivo.'),
+],
+async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const erroValidacao = new Error('Falha na validação dos dados.');
+            erroValidacao.status = 400;
+            erroValidacao.message = errors.array().map(err => err.msg);
+            throw erroValidacao;
+        }
         const { id } = req.params;
         const { titulo, descricao, url_imagem, tipo, id_autor } = req.body;
 

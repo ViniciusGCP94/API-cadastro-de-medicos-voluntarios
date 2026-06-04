@@ -2,9 +2,23 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
 
+const { body, validationResult } = require('express-validator');
+
 // 1. POST /inscricoes — Inscreve um voluntário em uma ação
-router.post('/inscricoes', async (req, res, next) => {
+router.post('/inscricoes', 
+[
+    body('id_voluntario').isInt().withMessage('O ID do voluntário deve ser um número inteiro.'),
+    body('id_acao').isInt().withMessage('O ID da ação deve ser um número inteiro.'),
+],
+async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const erroValidacao = new Error('Falha na validação dos dados.');
+            erroValidacao.status = 400;
+            erroValidacao.message = errors.array().map(err => err.msg);
+            throw erroValidacao;
+        }
         const { id_voluntario, id_acao } = req.body;
 
         const query = `

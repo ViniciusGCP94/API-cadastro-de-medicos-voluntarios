@@ -69,8 +69,24 @@ router.get('/voluntarios/:id', async (req, res, next) => {
 });
 
 // 4. ATUALIZAR
-router.put('/voluntarios/:id', async (req, res, next) => {
+router.put('/voluntarios/:id', 
+    [
+        body('nome').trim().notEmpty().withMessage('O nome não pode ser vazio.'),
+        body('sobrenome').trim().notEmpty().withMessage('O sobrenome não pode ser vazio.'),
+        body('email').trim().isEmail().withMessage('Email inválido.').normalizeEmail(),
+        // .optional() diz que se a senha não vier, tudo bem. Mas se vier, TEM que ter 6 caracteres!
+        body('senha').optional({checkFalsy:true}).isLength({ min: 6 }).withMessage('A senha deve ter pelo menos 6 caracteres.'),
+    ],
+    async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const erroValidacao = new Error('Falha na validação dos dados.');
+            erroValidacao.status = 400;
+            erroValidacao.message = errors.array().map(err => err.msg);
+            throw erroValidacao;
+        }
+        
         const { id } = req.params;
         const { nome, sobrenome, email, senha, telefone, nascimento, biografia } = req.body;
         
