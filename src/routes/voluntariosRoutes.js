@@ -3,21 +3,39 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 const pool = require('../config/db');
 
+//IMPORTAR AS FERRAMENTAS DE VALIDAÇÃO
+const { body, validationResult } = require('express-validator');
+
 // 1. CRIAR VOLUNTÁRIO
-router.post('/voluntarios', async (req, res, next) => {
-    try {
+router.post('/voluntarios', 
+    [
+        body('nome').trim().notEmpty().withMessage('O nome é obrigatório.'),
+        body('sobrenome').trim().notEmpty().withMessage('O sobrenome é obrigatório.'),
+        body('email').isEmail().withMessage('Email inválido.').normalizeEmail(), // Sanitização: deixa o email em minúsculas e limpo,,
+        body('senha').isLength({ min: 6 }).withMessage('A senha deve ter pelo menos 6 caracteres.'),
+        
+    ],
+    async (req, res, next) => {
+        try {
+
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                const erroValidacao = new Error('Falha na validação dos dados.');
+                erroValidacao.status = 400;
+
+                erroValidacao.message = errors.array().map(err => err.msg);
+                throw erroValidacao;
+            }
         const { nome, sobrenome, email, senha, telefone, nascimento, biografia } = req.body;
         const hashSenha = await bcrypt.hash(senha, 10);
-
         const query = `INSERT INTO voluntarios (nome, sobrenome, email, senha, telefone, nascimento, biografia) 
                     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, nome, email`;
         const values = [nome, sobrenome, email, hashSenha, telefone, nascimento, biografia];
-
         const result = await pool.query(query, values);
         res.status(201).json(result.rows[0]);
-    } catch (err) {
-        next(err); // Centralizado no app.js (ex: erro 23505)
-    }
+        } catch (err) {
+            next(err); // Centralizado no app.js (ex: erro 23505)
+        }
 });
 
 // 2. LISTAR TODOS
