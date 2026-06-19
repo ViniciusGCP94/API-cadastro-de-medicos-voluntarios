@@ -1,130 +1,37 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
+const controller = require('../controllers/acoesController');
 
 const { body, validationResult } = require('express-validator');
 
 // 1. POST /acoes — Cria uma nova ação vinculada a um voluntário (autor)
 router.post('/acoes',
-[
-    body('titulo').trim().notEmpty().withMessage('O título é obrigatório.'),
-    body('tipo').trim().notEmpty().withMessage('O tipo é obrigatório.'),
-    body('id_autor').isInt().withMessage('O ID do autor deve ser um número inteiro.'),
-],
-async (req, res, next) => {
-    try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            const erroValidacao = new Error('Falha na validação dos dados.');
-            erroValidacao.status = 400;
-            erroValidacao.message = errors.array().map(err => err.msg);
-            throw erroValidacao;
-        }
-
-        const { titulo, descricao, url_imagem, tipo, id_autor } = req.body;
-
-        const query = `
-            INSERT INTO acoes (titulo, descricao, url_imagem, tipo, id_autor) 
-            VALUES ($1, $2, $3, $4, $5) 
-            RETURNING id, titulo, descricao, url_imagem, tipo, id_autor, data_criacao
-        `;
-        const values = [titulo, descricao, url_imagem, tipo, id_autor];
-
-        const resultado = await pool.query(query, values);
-        res.status(201).json(resultado.rows[0]);
-    } catch (err) {
-        next(err); // O middleware global trata erros de FK (id_autor inexistente - 23503)
-    }
-});
+    [
+        body('titulo').trim().notEmpty().withMessage('O título é obrigatório.'),
+        body('tipo').trim().notEmpty().withMessage('O tipo é obrigatório.'),
+        body('id_autor').isInt().withMessage('O ID do autor deve ser um número inteiro.'),
+    ],
+    controller.criarAcao
+);
 
 // 2. GET /acoes — Lista todas as ações cadastradas
-router.get('/acoes', async (req, res, next) => {
-    try {
-        const query = `SELECT id, titulo, descricao, url_imagem, tipo, id_autor, data_criacao FROM acoes`;
-        const resultado = await pool.query(query);
-        res.json(resultado.rows);
-    } catch (err) {
-        next(err);
-    }
-});
+router.get('/acoes', controller.listarAcoesCadastradas);
 
 // 3. GET /acoes/:id — Busca uma ação específica pelo ID
-router.get('/acoes/:id', async (req, res, next) => {
-    try {
-        const { id } = req.params;
-        const query = `SELECT id, titulo, descricao, url_imagem, tipo, id_autor, data_criacao FROM acoes WHERE id = $1`;
-        const resultado = await pool.query(query, [id]);
-
-        if (resultado.rows.length === 0) {
-            const erro = new Error('Ação não encontrada.');
-            erro.status = 404;
-            throw erro; // Capturado pelo catch e enviado ao middleware global
-        }
-
-        res.json(resultado.rows[0]);
-    } catch (err) {
-        next(err);
-    }
-});
+router.get('/acoes/:id', controller.buscarAcaoPorId);
 
 // 4. PUT /acoes/:id — Atualiza os dados de uma ação existente
 router.put('/acoes/:id',
-[
-    body('titulo').trim().notEmpty().withMessage('O título é obrigatório.'),
-    body('tipo').trim().notEmpty().withMessage('O tipo é obrigatório.'),
-    body('id_autor').isInt({ min: 1 }).withMessage('O ID do autor deve ser um número inteiro positivo.'),
-],
-async (req, res, next) => {
-    try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            const erroValidacao = new Error('Falha na validação dos dados.');
-            erroValidacao.status = 400;
-            erroValidacao.message = errors.array().map(err => err.msg);
-            throw erroValidacao;
-        }
-        const { id } = req.params;
-        const { titulo, descricao, url_imagem, tipo, id_autor } = req.body;
-
-        const query = `
-            UPDATE acoes 
-            SET titulo = $1, descricao = $2, url_imagem = $3, tipo = $4, id_autor = $5
-            WHERE id = $6
-            RETURNING id, titulo, descricao, url_imagem, tipo, id_autor, data_criacao
-        `;
-        const values = [titulo, descricao, url_imagem, tipo, id_autor, id];
-
-        const resultado = await pool.query(query, values);
-
-        if (resultado.rowCount === 0) {
-            const erro = new Error('Ação não encontrada para atualização.');
-            erro.status = 404;
-            throw erro;
-        }
-
-        res.json(resultado.rows[0]);
-    } catch (err) {
-        next(err);
-    }
-});
+    [
+        body('titulo').trim().notEmpty().withMessage('O título é obrigatório.'),
+        body('tipo').trim().notEmpty().withMessage('O tipo é obrigatório.'),
+        body('id_autor').isInt({ min: 1 }).withMessage('O ID do autor deve ser um número inteiro positivo.'),
+    ],
+    controller.atualizarDadosAcao
+);
 
 // 5. DELETE /acoes/:id — Remove uma ação do sistema
-router.delete('/acoes/:id', async (req, res, next) => {
-    try {
-        const { id } = req.params;
-        const query = 'DELETE FROM acoes WHERE id = $1 RETURNING id';
-        const resultado = await pool.query(query, [id]);
-
-        if (resultado.rowCount === 0) {
-            const erro = new Error('Ação não encontrada para exclusão.');
-            erro.status = 404;
-            throw erro;
-        }
-
-        res.json({ message: 'Ação excluída com sucesso.' });
-    } catch (err) {
-        next(err);
-    }
-});
+router.delete('/acoes/:id', controller.excluirAcao); 
 
 module.exports = router;
