@@ -52,7 +52,7 @@ const buscarVoluntarioPorId =  async (req, res, next) => {
     }
 };
 
-const atualizarVoluntario = async (req, res, next) => {
+const atualizarDadosVoluntario = async (req, res, next) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -117,7 +117,7 @@ module.exports = {
     criarVoluntario,
     listarVoluntarios,
     buscarVoluntarioPorId,
-    atualizarVoluntario,
+    atualizarDadosVoluntario,
     excluirVoluntario
 }
 
