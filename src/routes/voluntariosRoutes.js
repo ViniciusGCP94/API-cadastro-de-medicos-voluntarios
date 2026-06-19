@@ -11,7 +11,7 @@ router.post('/voluntarios',
     [
         body('nome').trim().notEmpty().withMessage('O nome é obrigatório.'),
         body('sobrenome').trim().notEmpty().withMessage('O sobrenome é obrigatório.'),
-        body('email').isEmail().withMessage('Email inválido.').normalizeEmail(), // Sanitização: deixa o email em minúsculas e limpo,,
+        body('email').isEmail().withMessage('Email inválido.').normalizeEmail(), // Sanitização: deixa o email em minúsculas e limpo
         body('senha').isLength({ min: 6 }).withMessage('A senha deve ter pelo menos 6 caracteres.'),
         
     ],
@@ -86,7 +86,7 @@ router.put('/voluntarios/:id',
             erroValidacao.message = errors.array().map(err => err.msg);
             throw erroValidacao;
         }
-        
+
         const { id } = req.params;
         const { nome, sobrenome, email, senha, telefone, nascimento, biografia } = req.body;
         
