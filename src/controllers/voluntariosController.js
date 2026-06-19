@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const pool = require('../config/db');
+const { validationResult } = require('express-validator');
 
 const criarVoluntario = async (req, res, next) => {
     try {
