@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { authenticarToken }= require('../middlewares/authMiddleware');
 const controller = require('../controllers/voluntariosController');
 const { validarCriacaoVoluntario, validarAtualizacaoVoluntario } = require('../middlewares/validators/voluntarioValidator');
 
@@ -7,15 +8,15 @@ const { validarCriacaoVoluntario, validarAtualizacaoVoluntario } = require('../m
 router.post('/voluntarios', validarCriacaoVoluntario, controller.criarVoluntario);
 
 // 2. LISTAR TODOS
-router.get('/voluntarios', controller.listarVoluntarios);
+router.get('/voluntarios', authenticarToken, controller.listarVoluntarios);
 
 // 3. BUSCAR POR ID
-router.get('/voluntarios/:id', controller.buscarVoluntarioPorId);
+router.get('/voluntarios/:id', authenticarToken, controller.buscarVoluntarioPorId);
 
 // 4. ATUALIZAR DADOS DO VOLUNTÁRIO
-router.put('/voluntarios/:id', validarAtualizacaoVoluntario, controller.atualizarDadosVoluntario);
+router.put('/voluntarios/:id', authenticarToken, validarAtualizacaoVoluntario, controller.atualizarDadosVoluntario);
 
 // 5. EXCLUIR
-router.delete('/voluntarios/:id', controller.excluirVoluntario);
+router.delete('/voluntarios/:id', authenticarToken, controller.excluirVoluntario);
 
 module.exports = router;
