@@ -6,11 +6,12 @@ const db = require('./config/db');
 const voluntariosRoutes = require('./routes/voluntariosRoutes.js');
 const acoesRoutes = require('./routes/acoesRoutes.js'); 
 const inscricoesRoutes = require('./routes/inscricoesRoutes.js');
+const authRoutes = require('./routes/authRoutes');
 
 app.use(voluntariosRoutes);
 app.use(acoesRoutes);
 app.use(inscricoesRoutes);
-
+app.use('/auth', authRoutes);
 // Rota de teste assíncrona com banco de dados
 app.get('/teste-banco', async (req, res) => {
   const resultado = await db.query('SELECT * FROM voluntarios'); 
