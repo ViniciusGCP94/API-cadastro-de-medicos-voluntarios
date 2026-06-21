@@ -64,6 +64,11 @@ const atualizarDadosVoluntario = async (req, res, next) => {
         }
 
         const { id } = req.params;
+        if (req.params.id !== req.usuario.id.toString()) {
+            const erro = new Error('Acesso negado. Você não tem permissão para atualizar este voluntário.');
+            erro.status = 403;
+            throw erro;
+        }
         const { nome, sobrenome, email, senha, telefone, nascimento, biografia } = req.body;
         
         let query;
@@ -100,6 +105,11 @@ const atualizarDadosVoluntario = async (req, res, next) => {
 const excluirVoluntario = async (req, res, next) => {
     try {
         const { id } = req.params;
+        if (req.params.id !== req.usuario.id.toString()) {
+            const erro = new Error('Acesso negado. Você não tem permissão para excluir este voluntário.');
+            erro.status = 403;
+            throw erro;
+        }
         const query = 'DELETE FROM voluntarios WHERE id = $1 RETURNING id';
         const resultado = await pool.query(query, [id]);
 
