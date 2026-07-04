@@ -10,13 +10,16 @@ router.post('/voluntarios', validarCriacaoVoluntario, controller.criarVoluntario
 // 2. LISTAR TODOS
 router.get('/voluntarios', authenticarToken, controller.listarVoluntarios);
 
-// 3. BUSCAR POR ID
+// 3. BUSCAR MEU PERFIL (precisa vir ANTES de /:id)
+router.get('/voluntarios/me', authenticarToken, controller.buscarMeuPerfil);
+
+// 4. BUSCAR POR ID
 router.get('/voluntarios/:id', authenticarToken, controller.buscarVoluntarioPorId);
 
-// 4. ATUALIZAR DADOS DO VOLUNTÁRIO
+// 5. ATUALIZAR DADOS DO VOLUNTÁRIO
 router.put('/voluntarios/:id', authenticarToken, validarAtualizacaoVoluntario, controller.atualizarDadosVoluntario);
 
-// 5. EXCLUIR
+// 6. EXCLUIR
 router.delete('/voluntarios/:id', authenticarToken, controller.excluirVoluntario);
 
 module.exports = router;
