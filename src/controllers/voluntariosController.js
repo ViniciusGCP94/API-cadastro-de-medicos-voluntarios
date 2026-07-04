@@ -53,6 +53,22 @@ const buscarVoluntarioPorId =  async (req, res, next) => {
     }
 };
 
+const buscarMeuPerfil = async (req, res, next) => {
+    try {
+        const query = 'SELECT id, nome, sobrenome, email, telefone, nascimento, biografia FROM voluntarios WHERE id = $1';
+        const resultado = await pool.query(query, [req.usuario.id]);
+
+        if (resultado.rows.length === 0) {
+            const erro = new Error('Voluntário não encontrado.');
+            erro.status = 404;
+            throw erro;
+        }
+        res.json(resultado.rows[0]);
+    } catch (err) {
+        next(err);
+    }
+};
+
 const atualizarDadosVoluntario = async (req, res, next) => {
     try {
         const errors = validationResult(req);
@@ -128,6 +144,7 @@ module.exports = {
     criarVoluntario,
     listarVoluntarios,
     buscarVoluntarioPorId,
+    buscarMeuPerfil,
     atualizarDadosVoluntario,
     excluirVoluntario
 }
