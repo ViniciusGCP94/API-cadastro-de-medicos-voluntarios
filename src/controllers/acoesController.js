@@ -11,7 +11,8 @@ const criarAcao = async (req, res, next) => {
             throw erroValidacao;
         }
 
-        const { titulo, descricao, url_imagem, tipo, id_autor } = req.body;
+        const { titulo, descricao, url_imagem, tipo } = req.body;
+        const id_autor = req.usuario.id; 
 
         const query = `
             INSERT INTO acoes (titulo, descricao, url_imagem, tipo, id_autor) 
