@@ -1,7 +1,6 @@
 const {body} = require('express-validator');
 
 const validarInscricaoNaAcao = [
-    body('id_voluntario').isInt().withMessage('O ID do voluntário deve ser um número inteiro.'),
     body('id_acao').isInt().withMessage('O ID da ação deve ser um número inteiro.'),
 ];
 

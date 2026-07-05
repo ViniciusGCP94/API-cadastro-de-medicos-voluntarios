@@ -11,7 +11,9 @@ const inscreverVoluntarioEmAcao = async (req, res, next) => {
             erroValidacao.message = errors.array().map(err => err.msg);
             throw erroValidacao;
         }
-        const { id_voluntario, id_acao } = req.body;
+        
+        const id_voluntario  = req.usuario.id;
+        const { id_acao } = req.body;
 
         const query = `
             INSERT INTO inscricoes (id_voluntario, id_acao) 
@@ -57,14 +59,23 @@ const cancelarInscricao = async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        const query = 'DELETE FROM inscricoes WHERE id = $1 RETURNING id';
-        const resultado = await pool.query(query, [id]);
+        const checarQuery = 'SELECT id_voluntario FROM inscricoes WHERE id = $1';
+        const checarResultado = await pool.query(checarQuery, [id]);
 
-        if (resultado.rowCount === 0) {
+        if (checarResultado.rowCount === 0) {
             const erro = new Error('Inscrição não encontrada para cancelamento.');
             erro.status = 404;
             throw erro;
         }
+
+        if (checarResultado.rows[0].id_voluntario !== req.usuario.id) {
+            const erro = new Error('Acesso negado. Você não tem permissão para cancelar esta inscrição.');
+            erro.status = 403;
+            throw erro;
+        }
+
+        const query = 'DELETE FROM inscricoes WHERE id = $1 RETURNING id';
+        const resultado = await pool.query(query, [id]);
 
         res.json({ message: 'Inscrição cancelada com sucesso.' });
     } catch (error) {
