@@ -30,8 +30,17 @@ const criarAcao = async (req, res, next) => {
 
 const listarAcoesCadastradas = async (req, res, next) => {
     try {
-        const query = `SELECT id, titulo, descricao, url_imagem, tipo, id_autor, data_criacao FROM acoes`;
-        const resultado = await pool.query(query);
+        const { tipo } = req.query;
+
+        let query = `SELECT id, titulo, descricao, url_imagem, tipo, id_autor, data_criacao FROM acoes`;
+        const values = [];
+
+        if (tipo) {
+            query += ` WHERE tipo = $1`;
+            values.push(tipo);
+        }
+        
+        const resultado = await pool.query(query, values);
         res.json(resultado.rows);
     } catch (err) {
         next(err);
