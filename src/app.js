@@ -14,6 +14,7 @@ app.use(voluntariosRoutes);
 app.use(acoesRoutes);
 app.use(inscricoesRoutes);
 app.use('/auth', authRoutes);
+
 // Rota de teste assíncrona com banco de dados
 app.get('/teste-banco', async (req, res) => {
   const resultado = await db.query('SELECT * FROM voluntarios'); 
