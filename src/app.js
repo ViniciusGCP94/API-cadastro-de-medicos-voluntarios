@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
 app.use(express.json());
 const db = require('./config/db');
@@ -8,6 +9,7 @@ const acoesRoutes = require('./routes/acoesRoutes.js');
 const inscricoesRoutes = require('./routes/inscricoesRoutes.js');
 const authRoutes = require('./routes/authRoutes');
 
+app.use(cors());
 app.use(voluntariosRoutes);
 app.use(acoesRoutes);
 app.use(inscricoesRoutes);
