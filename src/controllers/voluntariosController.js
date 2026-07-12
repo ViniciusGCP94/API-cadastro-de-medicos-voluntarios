@@ -95,13 +95,13 @@ const atualizarDadosVoluntario = async (req, res, next) => {
             query = `UPDATE voluntarios 
                      SET nome = $1, sobrenome = $2, email = $3, senha = $4, telefone = $5, nascimento = $6, biografia = $7 
                      WHERE id = $8 
-                     RETURNING id, nome, sobrenome, email`;
+                     RETURNING id, nome, sobrenome, email, telefone, nascimento, biografia`;
             values = [nome, sobrenome, email, hashSenha, telefone, nascimento, biografia, id];
         } else {
             query = `UPDATE voluntarios 
                      SET nome = $1, sobrenome = $2, email = $3, telefone = $4, nascimento = $5, biografia = $6 
                      WHERE id = $7 
-                     RETURNING id, nome, sobrenome, email`;
+                     RETURNING id, nome, sobrenome, email, telefone, nascimento, biografia`;
             values = [nome, sobrenome, email, telefone, nascimento, biografia, id];
         }
 
